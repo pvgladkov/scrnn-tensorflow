@@ -112,10 +112,14 @@ class SCRNNCell(RNNCell):
                     out_size=self._num_units
                 ))
 
-            context_state = (1 - alpha) * math_ops.matmul(inputs, B) + alpha * state_c  # batch_size x context_units
-            hidden_state = math_ops.sigmoid(_linear([context_state, inputs, state_h], self._num_units, False))  # batch_size x num_units
+            # context_state.shape = (batch_size x context_units)
+            context_state = (1 - alpha) * math_ops.matmul(inputs, B) + alpha * state_c
 
-            output = math_ops.matmul(hidden_state, U) + math_ops.matmul(context_state, V)  # batch_size x num_units
+            # hidden_state.shape = (batch_size x num_units)
+            hidden_state = math_ops.sigmoid(_linear([context_state, inputs, state_h], self._num_units, False))
+
+            # output.shape = (batch_size x num_units)
+            output = math_ops.matmul(hidden_state, U) + math_ops.matmul(context_state, V)
 
         new_state = array_ops.concat(
             values=[hidden_state, context_state], axis=1)
