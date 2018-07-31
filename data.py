@@ -12,8 +12,11 @@ class Vocabulary:
 
 class DataProvider:
 
-    def __init__(self, text, seq_length, batch_size, logger):
-        self.vocab = Vocabulary(text, seq_length)
+    def __init__(self, text, seq_length, batch_size, logger, vocabulary=None):
+        if vocabulary:
+            self.vocab = vocabulary
+        else:
+            self.vocab = Vocabulary(text, seq_length)
         self.logger = logger
         self.pointer = 0
         self.batch_size = batch_size

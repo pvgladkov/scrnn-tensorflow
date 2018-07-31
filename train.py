@@ -1,4 +1,5 @@
 import io
+import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import rnn
 from tensorflow.contrib.rnn import LSTMCell
@@ -15,6 +16,13 @@ def get_text():
     return txt
 
 
+def get_test_text():
+    txt = ''
+    with io.open('data/ptb/ptb.test.txt', encoding='utf-8') as f:
+        txt += f.read().lower()
+    return txt
+
+
 if __name__ == '__main__':
 
     logger = get_logger()
@@ -24,9 +32,9 @@ if __name__ == '__main__':
 
     max_len = 100
     seq_length = max_len
-    batch_size = 64
+    batch_size = 128
     rnn_size = 128
-    num_epochs = 10
+    num_epochs = 100
     learning_rate = 1e-1
 
     logger.info('build vocabulary')
@@ -62,6 +70,8 @@ if __name__ == '__main__':
 
     init = tf.global_variables_initializer()
 
+    loss, acc = 0, 0
+
     with tf.Session() as sess:
 
         sess.run(init)
@@ -71,5 +81,18 @@ if __name__ == '__main__':
                 X_train_batch, y_train_batch = data_provider.next_batch()
                 sess.run(train_op, feed_dict={input_data: X_train_batch, targets: y_train_batch})
                 loss, acc = sess.run([loss_op, accuracy], feed_dict={input_data: X_train_batch, targets: y_train_batch})
-                logger.info("Step {}, Loss= {:.4f}, Accuracy= {:.3f}".format(e, loss, acc))
+            perplexity = np.exp(loss)
+            logger.info("Step {}, Loss= {:.4f}, Perplexity= {:.3f}".format(e, loss, acc, perplexity))
             data_provider.reset_batch_pointer()
+
+    logger.info('test')
+    test_text = get_test_text()
+    test_data_provider = DataProvider(test_text, seq_length, batch_size, logger, data_provider.vocab)
+
+    loss = []
+    for _ in range(data_provider.num_batches):
+        X_test_batch, y_test_batch = test_data_provider.next_batch()
+        _loss, _acc = sess.run([loss_op, accuracy], feed_dict={input_data: X_test_batch, targets: y_test_batch})
+        loss.append(_loss)
+    perplexity = np.exp(np.mean(loss))
+    logger.info("Loss= {:.4f}, Perplexity= {:.3f}".format(np.mean(loss), perplexity))
