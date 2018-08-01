@@ -48,7 +48,8 @@ if __name__ == '__main__':
     input_data = tf.placeholder(tf.float32, [batch_size, seq_length, vocab_size])
     targets = tf.placeholder(tf.float32, [batch_size, vocab_size])
 
-    cell = SCRNNCell(num_units=rnn_size, context_units=40, alpha=0.95)
+    cell = LSTMCell(num_units=rnn_size)
+    # cell = SCRNNCell(num_units=rnn_size, context_units=40, alpha=0.95)
     # initial_state = cell.zero_state(batch_size, tf.float32)
 
     # Define weights
@@ -64,35 +65,31 @@ if __name__ == '__main__':
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
     train_op = optimizer.minimize(loss_op)
 
-    # Evaluate model (with test logits, for dropout to be disabled)
     correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(targets, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     init = tf.global_variables_initializer()
 
-    loss, acc = 0, 0
+    loss = 0
 
     with tf.Session() as sess:
-
         sess.run(init)
-
         for e in range(num_epochs):
             for _ in range(data_provider.num_batches):
                 X_train_batch, y_train_batch = data_provider.next_batch()
                 sess.run(train_op, feed_dict={input_data: X_train_batch, targets: y_train_batch})
-                loss, acc = sess.run([loss_op, accuracy], feed_dict={input_data: X_train_batch, targets: y_train_batch})
+                loss = sess.run(loss_op, feed_dict={input_data: X_train_batch, targets: y_train_batch})
             perplexity = np.exp(loss)
-            logger.info("Step {}, Loss= {:.4f}, Perplexity= {:.3f}".format(e, loss, acc, perplexity))
+            logger.info("Step {}, Loss= {:.4f}, Perplexity= {:.3f}".format(e, loss, perplexity))
             data_provider.reset_batch_pointer()
 
-    logger.info('test')
-    test_text = get_test_text()
-    test_data_provider = DataProvider(test_text, seq_length, batch_size, logger, data_provider.vocab)
+        logger.info('test')
+        test_text = get_test_text()
+        test_data_provider = DataProvider(test_text, seq_length, batch_size, logger, data_provider.vocab)
 
-    loss = []
-    for _ in range(test_data_provider.num_batches):
-        X_test_batch, y_test_batch = test_data_provider.next_batch()
-        _loss, _acc = sess.run([loss_op, accuracy], feed_dict={input_data: X_test_batch, targets: y_test_batch})
-        loss.append(_loss)
-    perplexity = np.exp(np.mean(loss))
-    logger.info("Loss= {:.4f}, Perplexity= {:.3f}".format(np.mean(loss), perplexity))
+        loss = []
+        for _ in range(test_data_provider.num_batches):
+            X_test_batch, y_test_batch = test_data_provider.next_batch()
+            _loss = sess.run(loss_op, feed_dict={input_data: X_test_batch, targets: y_test_batch})
+            loss.append(_loss)
+        perplexity = np.exp(np.mean(loss))
+        logger.info("Loss= {:.4f}, Perplexity= {:.3f}".format(np.mean(loss), perplexity))
