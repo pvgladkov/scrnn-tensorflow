@@ -90,7 +90,7 @@ if __name__ == '__main__':
     test_data_provider = DataProvider(test_text, seq_length, batch_size, logger, data_provider.vocab)
 
     loss = []
-    for _ in range(data_provider.num_batches):
+    for _ in range(test_data_provider.num_batches):
         X_test_batch, y_test_batch = test_data_provider.next_batch()
         _loss, _acc = sess.run([loss_op, accuracy], feed_dict={input_data: X_test_batch, targets: y_test_batch})
         loss.append(_loss)
