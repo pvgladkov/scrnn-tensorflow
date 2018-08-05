@@ -14,3 +14,24 @@ $ bash ./data/makedata-ptb.sh
 |---|---|---|---|---|---|
 |LSTM|100|128|2.473|4.052|-|
 |SCRNN|100|128|5.774|7.590|-|
+
+
+### Usage
+
+```
+$ python train.py --cell scrnn --lr 0.1 --num_epoch 250
+```
+
+args:
+
+`cell` - type of rnn cell. `lstm` or `scrnn`.
+
+`lr` - learning rate.
+
+`seq_length` - sequence length.
+
+`rnn_size` - size of the hidden layer.
+
+`num_epoch` - number of epochs.
+
+`batch_size`
