@@ -22,7 +22,7 @@ $ bash ./data/makedata-ptb.sh
 $ python train.py --cell scrnn --lr 0.1 --num_epoch 250
 ```
 
-args:
+#### Args
 
 `cell` - type of rnn cell. `lstm` or `scrnn`.
 
