@@ -34,4 +34,4 @@ args:
 
 `num_epoch` - number of epochs.
 
-`batch_size`
+`batch_size` - batch size. 
