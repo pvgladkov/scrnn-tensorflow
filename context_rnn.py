@@ -43,7 +43,7 @@ def glorot_initializer(in_size, out_size):
     return init_ops.random_uniform_initializer(-width, width)
 
 
-class SCRNNCell(RNNCell):
+class SCRNCell(RNNCell):
 
     """
     Tensor Flow port of Structurally Constrained Recurrent Neural Network model
@@ -58,7 +58,7 @@ class SCRNNCell(RNNCell):
     """
 
     def __init__(self, num_units, context_units, alpha, reuse=None):
-        super(SCRNNCell, self).__init__(_reuse=reuse)
+        super(SCRNCell, self).__init__(_reuse=reuse)
         self._num_units = num_units
         self._context_units = context_units
         self._alpha = alpha
@@ -79,6 +79,7 @@ class SCRNNCell(RNNCell):
         self._batch_size = inputs.shape[0].value or array_ops.shape(inputs)[0]
         self._input_size = inputs.shape[1].value or array_ops.shape(inputs)[1]
 
+        # todo make alpha trainable
         alpha = self._alpha
 
         state_h = array_ops.slice(

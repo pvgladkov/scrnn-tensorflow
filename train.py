@@ -3,11 +3,11 @@ import argparse
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import rnn
-from tensorflow.contrib.rnn import LSTMCell
+from tensorflow.contrib.rnn import LSTMCell, BasicRNNCell, GRUCell
 
 from utils import get_logger
 from data import DataProvider
-from context_rnn import SCRNNCell
+from context_rnn import SCRNCell
 
 
 def get_text():
@@ -22,10 +22,13 @@ def get_text():
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cell', type=str, default='scrnn', help='type of cell', choices=['scrnn', 'lstm'])
+    parser.add_argument('--cell', type=str, default='scrn', help='type of cell',
+                        choices=['scrn', 'lstm', 'rnn', 'gru'])
     parser.add_argument('--lr', type=float, default=1e-1, help='learning rate')
+    parser.add_argument('--alpha', type=float, default=0.95, help='alpha')
     parser.add_argument('--seq_length', type=int, default=100, help='seq length')
     parser.add_argument('--rnn_size', type=int, default=128, help='rnn size')
+    parser.add_argument('--context_size', type=int, default=40, help='context size')
     parser.add_argument('--num_epoch', type=int, default=100, help='num epoch')
     parser.add_argument('--batch_size', type=int, default=128, help='batch size')
     return parser.parse_args()
@@ -43,8 +46,10 @@ if __name__ == '__main__':
     seq_length = args.seq_length
     batch_size = args.batch_size
     rnn_size = args.rnn_size
+    context_size = args.context_size
     num_epochs = args.num_epoch
     learning_rate = args.lr
+    alpha = args.alpha
 
     logger.info('build vocabulary')
     data_provider = DataProvider(train_text, seq_length, batch_size, logger)
@@ -59,8 +64,12 @@ if __name__ == '__main__':
 
     if args.cell == 'lstm':
         cell = LSTMCell(num_units=rnn_size)
+    elif args.cell == 'rnn':
+        cell = BasicRNNCell(num_units=rnn_size)
+    elif args.cell == 'gru':
+        cell = GRUCell(num_units=rnn_size)
     else:
-        cell = SCRNNCell(num_units=rnn_size, context_units=40, alpha=0.95)
+        cell = SCRNCell(num_units=rnn_size, context_units=context_size, alpha=alpha)
     # initial_state = cell.zero_state(batch_size, tf.float32)
 
     # Define weights
