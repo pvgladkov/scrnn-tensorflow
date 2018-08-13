@@ -3,7 +3,7 @@
 TensorFlow implementation of SCRNN cell from the paper titled: Learning Longer Memory in Recurrent Neural Networks: http://arxiv.org/abs/1412.7753.
 
 
-### Results
+## Results
 
 |cell|num epoch|size|train perplexity|test perplexity|time|
 |---|---|---|---|---|---|
@@ -17,19 +17,27 @@ TensorFlow implementation of SCRNN cell from the paper titled: Learning Longer M
 |GRU|100|128|1.314|2.942|-|
 |GRU|1000|128|1.001|1.001|-|
 
+### SCRN
+
+![scrn perplexity](https://raw.githubusercontent.com/webgeist/scrnn-tensorflow/master/results/scrn-128-32-005-2000.png)
+
+### LSTM
+
+![lstm preplexity](https://raw.githubusercontent.com/webgeist/scrnn-tensorflow/master/results/lstm-128-32-005-2000.png)
+
 
 ### Get data
 ```
 $ bash ./data/makedata-ptb.sh
 ```
 
-### Usage
+## Usage
 
 ```
 $ python train.py --cell scrnn --lr 0.1 --num_epoch 250
 ```
 
-#### Args
+### Args
 
 `cell` - type of rnn cell. `lstm` or `scrnn`.
 
@@ -42,5 +50,4 @@ $ python train.py --cell scrnn --lr 0.1 --num_epoch 250
 `num_epoch` - number of epochs.
 
 `batch_size` - batch size. 
-
 
