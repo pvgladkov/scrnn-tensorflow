@@ -1,6 +1,7 @@
 import io
 import argparse
 import numpy as np
+import time
 import tensorflow as tf
 from tensorflow.contrib import rnn
 from tensorflow.contrib.rnn import LSTMCell, BasicRNNCell, GRUCell
@@ -62,6 +63,8 @@ if __name__ == '__main__':
     input_data = tf.placeholder(tf.float32, [batch_size, seq_length, vocab_size])
     targets = tf.placeholder(tf.float32, [batch_size, vocab_size])
 
+    test_data_provider = DataProvider(test_text, seq_length, batch_size, logger, data_provider.vocab)
+
     if args.cell == 'lstm':
         cell = LSTMCell(num_units=rnn_size)
     elif args.cell == 'rnn':
@@ -82,6 +85,11 @@ if __name__ == '__main__':
     prediction = tf.nn.softmax(logits)
 
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=targets))
+    tf.summary.scalar('loss', loss_op)
+
+    perplexity_op = tf.exp(loss_op)
+    tf.summary.scalar('perplexity', perplexity_op)
+
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
     train_op = optimizer.minimize(loss_op)
 
@@ -90,25 +98,53 @@ if __name__ == '__main__':
     init = tf.global_variables_initializer()
 
     loss = 0
+    merged = tf.summary.merge_all()
+
+    start = time.time()
 
     with tf.Session() as sess:
         sess.run(init)
+
+        train_writer = tf.summary.FileWriter('logs' + '/train', sess.graph)
+        test_writer = tf.summary.FileWriter('logs' + '/test')
+
         for e in range(num_epochs):
-            for _ in range(data_provider.num_batches):
-                X_train_batch, y_train_batch = data_provider.next_batch()
-                sess.run(train_op, feed_dict={input_data: X_train_batch, targets: y_train_batch})
-                loss = sess.run(loss_op, feed_dict={input_data: X_train_batch, targets: y_train_batch})
-            perplexity = np.exp(loss)
-            logger.info("Step {}, Loss={:.4f}, Perplexity={:.3f}".format(e, loss, perplexity))
-            data_provider.reset_batch_pointer()
 
-        logger.info('test')
-        test_data_provider = DataProvider(test_text, seq_length, batch_size, logger, data_provider.vocab)
+            summary = None
+            run_metadata = None
 
-        loss = []
-        for _ in range(test_data_provider.num_batches):
-            X_test_batch, y_test_batch = test_data_provider.next_batch()
-            _loss = sess.run(loss_op, feed_dict={input_data: X_test_batch, targets: y_test_batch})
-            loss.append(_loss)
-        perplexity = np.exp(np.mean(loss))
-        logger.info("Loss={:.4f}, Perplexity={:.3f}".format(np.mean(loss), perplexity))
+            if e > 0 and e % 10 == 0:
+                losses = []
+                for _ in range(test_data_provider.num_batches):
+                    X_test_batch, y_test_batch = test_data_provider.next_batch()
+                    _loss = sess.run(loss_op, feed_dict={input_data: X_test_batch, targets: y_test_batch})
+                    losses.append(_loss)
+                perplexity = np.exp(np.mean(losses))
+                summary = tf.Summary()
+                summary.value.add(tag="perplexity", simple_value=perplexity)
+                summary.value.add(tag="loss", simple_value=np.mean(losses))
+                test_writer.add_summary(summary, e)
+
+                test_data_provider.reset_batch_pointer()
+
+                logger.info('Step {}, train time {}'.format(e, time.time() - start))
+
+            else:
+                for _ in range(data_provider.num_batches):
+                    X_train_batch, y_train_batch = data_provider.next_batch()
+
+                    run_metadata = tf.RunMetadata()
+
+                    summary, _ = sess.run([merged, train_op],
+                                          feed_dict={input_data: X_train_batch, targets: y_train_batch},
+                                          run_metadata=run_metadata)
+
+                train_writer.add_run_metadata(run_metadata, 'step%03d' % e)
+                train_writer.add_summary(summary, e)
+
+                data_provider.reset_batch_pointer()
+
+        train_writer.close()
+        test_writer.close()
+
+        logger.info('Training time {}'.format(time.time() - start))

@@ -42,3 +42,5 @@ $ python train.py --cell scrnn --lr 0.1 --num_epoch 250
 `num_epoch` - number of epochs.
 
 `batch_size` - batch size. 
+
+
