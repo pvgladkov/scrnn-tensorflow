@@ -27,11 +27,11 @@ TensorFlow implementation of SCRNN cell from the paper titled: Learning Longer M
 
 ### GRU
 
-![lstm preplexity](https://raw.githubusercontent.com/webgeist/scrnn-tensorflow/master/results/gru-128-32-005-2000.png)
+![gru preplexity](https://raw.githubusercontent.com/webgeist/scrnn-tensorflow/master/results/gru-128-32-005-2000.png)
 
 ### Basic RNN
 
-![lstm preplexity](https://raw.githubusercontent.com/webgeist/scrnn-tensorflow/master/results/rnn-128-32-005-1500.png)
+![rnn preplexity](https://raw.githubusercontent.com/webgeist/scrnn-tensorflow/master/results/rnn-128-32-005-1500.png)
 
 ### Get data
 ```
