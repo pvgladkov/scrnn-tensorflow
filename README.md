@@ -19,7 +19,7 @@ TensorFlow implementation of SCRNN cell from the paper titled: Learning Longer M
 
 ### SCRN
 
-![scrn perplexity](https://raw.githubusercontent.com/webgeist/scrnn-tensorflow/master/results/scrn-128-32-005-2000.png)
+![scrn perplexity](https://raw.githubusercontent.com/webgeist/scrnn-tensorflow/master/results/scrn-128-32-005-2500.png)
 
 ### LSTM
 
