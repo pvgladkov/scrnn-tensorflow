@@ -35,6 +35,17 @@ def parse_args():
     return parser.parse_args()
 
 
+def count_parameters():
+    total_parameters = 0
+    for variable in tf.trainable_variables():
+        shape = variable.get_shape()
+        variable_parameters = 1
+        for dim in shape:
+            variable_parameters *= dim.value
+        total_parameters += variable_parameters
+    return total_parameters
+
+
 if __name__ == '__main__':
 
     logger = get_logger()
@@ -107,6 +118,8 @@ if __name__ == '__main__':
 
         train_writer = tf.summary.FileWriter('logs' + '/train', sess.graph)
         test_writer = tf.summary.FileWriter('logs' + '/test')
+
+        logger.info('total parameters={}'.format(count_parameters()))
 
         for e in range(num_epochs):
 

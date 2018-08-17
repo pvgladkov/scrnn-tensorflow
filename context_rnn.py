@@ -1,10 +1,9 @@
+import tensorflow as tf
 from tensorflow.contrib.rnn import RNNCell
 from tensorflow.python.ops import variable_scope as vs
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import array_ops
-from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import rnn_cell_impl
-import math
 import collections
 
 _linear = rnn_cell_impl._linear
@@ -30,19 +29,6 @@ class SCStateTuple(_SCStateTuple):
         return c.dtype
 
 
-def glorot_initializer(in_size, out_size):
-    """
-    Normalized initialization proposed for variance stabilization per layer
-
-    Links:
-
-    Understanding the difficulty of training deep feedforward neural networks
-    http://jmlr.org/proceedings/papers/v9/glorot10a/glorot10a.pdf
-    """
-    width = math.sqrt(6.0 / (in_size + out_size))
-    return init_ops.random_uniform_initializer(-width, width)
-
-
 class SCRNCell(RNNCell):
 
     """
@@ -57,12 +43,12 @@ class SCRNCell(RNNCell):
     https://github.com/facebookarchive/SCRNNs
     """
 
-    def __init__(self, num_units, context_units, alpha, reuse=None):
+    def __init__(self, num_units, context_units, alpha=None, reuse=None):
         super(SCRNCell, self).__init__(_reuse=reuse)
         self._num_units = num_units
         self._context_units = context_units
         self._alpha = alpha
-        self._initializer = None
+        self._initializer = tf.glorot_uniform_initializer()
         self._batch_size = None
         self._input_size = None
 
@@ -93,25 +79,13 @@ class SCRNCell(RNNCell):
         with vs.variable_scope(vs.get_variable_scope(), initializer=self._initializer):
 
             B = vs.get_variable(
-                'B_matrix', shape=[self._input_size, self._context_units],
-                initializer=glorot_initializer(
-                    in_size=self._input_size,
-                    out_size=self._context_units
-                ))
+                'B_matrix', shape=[self._input_size, self._context_units])
 
             V = vs.get_variable(
-                'V_matrix', shape=[self._context_units, self._num_units],
-                initializer=glorot_initializer(
-                    in_size=self._context_units,
-                    out_size=self._num_units
-                ))
+                'V_matrix', shape=[self._context_units, self._num_units])
 
             U = vs.get_variable(
-                'U_matrix', shape=[self._num_units, self._num_units],
-                initializer=glorot_initializer(
-                    in_size=self._num_units,
-                    out_size=self._num_units
-                ))
+                'U_matrix', shape=[self._num_units, self._num_units])
 
             # context_state.shape = (batch_size x context_units)
             context_state = (1 - alpha) * math_ops.matmul(inputs, B) + alpha * state_c

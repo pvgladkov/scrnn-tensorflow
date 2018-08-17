@@ -5,17 +5,17 @@ TensorFlow implementation of SCRNN cell from the paper titled: Learning Longer M
 
 ## Results
 
-|cell|num epoch|size|train perplexity|test perplexity|
-|---|---|---|---|---|
-|LSTM|100|128|2.473|4.052|
-|LSTM|1000|128|1.004|1.004|
-|SCRN|100|128|5.774|7.590|
-|SCRN|1000|128|1.882|2.816|
-|SCRN|2500|128|1.004|1.006|
-|BasicRNN|100|128|17.391|20.973|
-|BasicRNN|1000|128|1.218|2.370|
-|GRU|100|128|1.314|2.942|
-|GRU|1000|128|1.001|1.001|
+|cell|num epoch|size|train perplexity|test perplexity|trainable parameters|
+|---|---|---|---|---|---|
+|LSTM|100|128|2.473|4.052|97457|
+|LSTM|1000|128|1.004|1.004|97457|
+|SCRN|100|128|5.774|7.590|55121|
+|SCRN|1000|128|1.882|2.816|55121|
+|SCRN|2500|128|1.004|1.006|55121|
+|BasicRNN|100|128|17.391|20.973|29105|
+|BasicRNN|1000|128|1.218|2.370|29105|
+|GRU|100|128|1.314|2.942|74673|
+|GRU|1000|128|1.001|1.001|74673|
 
 ### SCRN
 
