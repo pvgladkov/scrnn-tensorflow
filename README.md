@@ -2,6 +2,8 @@
 
 TensorFlow implementation of SCRNN cell from the paper titled: Learning Longer Memory in Recurrent Neural Networks: http://arxiv.org/abs/1412.7753.
 
+Original torch implementation [https://github.com/facebookarchive/SCRNNs](https://github.com/facebookarchive/SCRNNs).
+
 
 ## Results
 
